@@ -1,12 +1,15 @@
+import { SocketProvider } from "./context/SocketContext";
 import { UiProvider } from "./context/UiContext";
 import { RouterPage } from "./pages/RouterPage";
 
 function App() {
   return (
     <>
-      <UiProvider>
-        <RouterPage />
-      </UiProvider>
+      <SocketProvider>
+        <UiProvider>
+          <RouterPage />
+        </UiProvider>
+      </SocketProvider>
     </>
   );
 }

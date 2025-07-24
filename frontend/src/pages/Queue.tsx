@@ -1,54 +1,41 @@
+import { useEffect, useState } from "react";
+import { useSocketContext } from "../context/SocketContext";
 import { useSidebar } from "../hooks/useSidebar";
-
-const data = [
-  {
-    ticketNo: 33,
-    escritorio: 3,
-    agente: "Fernando Herrera",
-  },
-  {
-    ticketNo: 34,
-    escritorio: 4,
-    agente: "Melissa Flores",
-  },
-  {
-    ticketNo: 35,
-    escritorio: 5,
-    agente: "Carlos Castro",
-  },
-  {
-    ticketNo: 36,
-    escritorio: 3,
-    agente: "Fernando Herrera",
-  },
-  {
-    ticketNo: 37,
-    escritorio: 3,
-    agente: "Fernando Herrera",
-  },
-  {
-    ticketNo: 38,
-    escritorio: 2,
-    agente: "Melissa Flores",
-  },
-  {
-    ticketNo: 39,
-    escritorio: 5,
-    agente: "Carlos Castro",
-  },
-];
+import type { Ticket } from "../interfaces/ticket";
 
 export function Queue() {
-    useSidebar(false)
+  useSidebar(false)
+
+  const { socket } = useSocketContext()
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+
+  useEffect(() => {
+    const getLasts = async () => {
+      const response = await fetch("http://localhost:8000/ultimos")
+      const data = await response.json()
+      setTickets(data.ultimos)
+    }
+    getLasts()
+  }, [])
+
+  useEffect(() => {
+    socket.on("tickets-asignados", (asignados) => {
+      console.log(asignados)
+      setTickets(asignados)
+    })
+    return () => {
+      socket.off("tickets-asignados")
+    }
+  }, [socket])
 
   return (
     <>
       <div className="grid grid-cols-8 gap-8">
         <div className="col-span-4">
           <h1 className="text-4xl font-bold">Atendiendo al cliente</h1>
-          {data.map((item) => (
-            <div className="border p-2 mb-6 " key={item.ticketNo}>
-              <p className="text-5xl font-bold my-6">{item.ticketNo}</p>
+          {tickets.map((item) => (
+            <div className="border p-2 mb-6 " key={item.numero}>
+              <p className="text-5xl font-bold my-6">{item.numero}</p>
               <div className="flex gap-3">
                 <button className="rounded-lg bg-orange-300 text-orange-600 px-2 py-1">
                   {item.agente}
@@ -65,15 +52,15 @@ export function Queue() {
         <div className="col-span-4">
           <h3 className="text-center">Historial</h3>
 
-          {data.map((item) => (
-            <div key={item.ticketNo}>
-              <p>Ticket No. {item.ticketNo} </p>
+          {tickets.map((item) => (
+            <div key={item.numero}>
+              <p>Ticket No. {item.numero} </p>
               <div className="flex gap-3">
                 <p>
                   En el esritorio{" "}
                   <span className="text-rose-800 bg-rose-200 px-2 py-1">
                     {" "}
-                    {item.ticketNo}
+                    {item.numero}
                   </span>{" "}
                 </p>
                 <p>
